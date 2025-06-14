@@ -1,8 +1,11 @@
 import React from "react";
-import { useTheme } from '../contexts/ThemeContext';
-import { fontSizes, spacing, borders } from '../designSystem';
+import { useTheme } from '../contexts/ThemeContext'; // 1. Importar o hook
+import { fontSizes, spacing, borders } from "../designSystem"; // 'colors' removido daqui
 
 const Login = () => {
+  // 2. Pegar as cores do contexto
+  const { colors } = useTheme();
+
   return (
     <div
       style={{
@@ -11,14 +14,14 @@ const Login = () => {
         alignItems: "center",
         width: "100vw",
         minHeight: "100vh",
-        backgroundColor: colors.background,
+        backgroundColor: colors.background, // Agora usa a cor dinâmica
         padding: spacing.md,
         boxSizing: "border-box",
       }}
     >
       <div
         style={{
-          backgroundColor: colors.white,
+          backgroundColor: colors.white, // Agora usa a cor dinâmica
           padding: spacing.lg,
           borderRadius: borders.radius,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
@@ -29,7 +32,7 @@ const Login = () => {
         <h1
           style={{
             fontSize: fontSizes.title,
-            color: colors.primary,
+            color: colors.textDark, // Corrigido para usar a cor de texto do tema
             textAlign: "center",
             marginBottom: spacing.lg,
           }}
@@ -56,7 +59,9 @@ const Login = () => {
               style={{
                 padding: spacing.sm,
                 borderRadius: borders.radius,
-                border: `1px solid ${colors.textLight}`,
+                border: `1px solid ${colors.alternateRow}`, // Usando cor do tema
+                backgroundColor: colors.background, // Usando cor do tema
+                color: colors.textDark, // Usando cor do tema
                 fontSize: fontSizes.base,
               }}
             />
@@ -80,7 +85,9 @@ const Login = () => {
               style={{
                 padding: spacing.sm,
                 borderRadius: borders.radius,
-                border: `1px solid ${colors.textLight}`,
+                border: `1px solid ${colors.alternateRow}`, // Usando cor do tema
+                backgroundColor: colors.background, // Usando cor do tema
+                color: colors.textDark, // Usando cor do tema
                 fontSize: fontSizes.base,
               }}
             />
@@ -90,18 +97,15 @@ const Login = () => {
             type="submit"
             style={{
               marginTop: spacing.sm,
-              backgroundColor: colors.primary,
+              backgroundColor: colors.primaryLight, // Usando a cor mais vibrante
               color: colors.white,
-              padding: spacing.sm,
+              padding: spacing.md, // Aumentando padding
               borderRadius: borders.radius,
               fontSize: fontSizes.base,
               fontWeight: "bold",
               border: "none",
               cursor: "pointer",
-              transition: "background-color 0.2s ease-in-out",
             }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = colors.primaryLight)}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
           >
             Entrar
           </button>
