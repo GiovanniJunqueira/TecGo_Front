@@ -1,6 +1,6 @@
 // src/contexts/ThemeContext.tsx
 
-import React, { createContext, useState, useContext, useMemo, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useContext, useMemo, useEffect, type ReactNode } from 'react';
 import { lightColors, darkColors } from '../designSystem';
 
 interface ThemeContextData {
