@@ -1,264 +1,169 @@
-import React, { useState } from "react";
-import { colors, fontSizes, spacing, borders } from "../designSystem";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext'; 
+import { fontSizes, spacing, borders } from '../designSystem'; 
 
-
-const modules = [
-  { label: "Gestão de alunos", bg: "#FFFFFF", icon: "👥" },
-  { label: "Controle de pagamentos", bg: "#FFFFFF", icon: "✅" },
-  { label: "Histórico de partidas", bg: "#FFFFFF", icon: "🗓" },
-  { label: "Gestão de funcionários", bg: "#FFFFFF", icon: "👨‍💼" },
-  { label: "Dashboard", bg: "#FFFFFF", icon: "📊" },
-  { label: "Escalação", bg: "#FFFFFF", icon: "⚽" },
-];
-
-const Dashboard = () => {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  const handleThemeChange = (mode: "light" | "dark") => {
-    setTheme(mode);
-    // Aqui você pode incluir lógica adicional para alterar o tema globalmente
+// --- Interfaces e Tipos ---
+interface DashboardData {
+  kpis: {
+    totalAlunos: number;
+    alunosAtivos: number;
+    mensalidadesPendentes: number;
   };
+  proximosEventos: Array<{
+    id: number;
+    tipo: 'Jogo' | 'Treino';
+    data: Date;
+    descricao: string;
+    local: string;
+  }>;
+  alunosPorCategoria: Array<{
+    categoria: string;
+    quantidade: number;
+  }>;
+}
 
-  return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        boxSizing: "border-box",
-        overflow: "hidden", // Garante que não haverá scroll horizontal indesejado
-      }}
-    >
-      {/* Header */}
-      <header
-        style={{
-          width: "100%",
-          backgroundColor: colors.header,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-          padding: spacing.lg,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          boxSizing: "border-box",
-        }}
-      >
-        <h1 style={{ fontSize: fontSizes.title, color: colors.textDark }}>
-          Sistema de Gerenciamento
-        </h1>
-        <div style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-          Início / Pages / Dashboard
-        </div>
-      </header>
+// --- API Mock Adaptada para Múltiplas Unidades ---
+const mockDashboardData: { [key: string]: DashboardData } = {
+  geral: {
+    kpis: { totalAlunos: 205, alunosAtivos: 190, mensalidadesPendentes: 25 },
+    proximosEventos: [
+      { id: 1, tipo: 'Jogo', data: new Date('2025-06-15T10:00:00'), descricao: 'Sub-15 vs EC Esperança', local: 'Unidade Centro' },
+      { id: 2, tipo: 'Treino', data: new Date('2025-06-16T16:00:00'), descricao: 'Sub-11 - Treino Físico', local: 'Unidade Centro' },
+      { id: 3, tipo: 'Treino', data: new Date('2025-06-17T09:00:00'), descricao: 'Sub-13 - Treino Tático', local: 'Unidade Sul' },
+    ],
+    alunosPorCategoria: [
+      { categoria: 'Sub-9', quantidade: 40 }, { categoria: 'Sub-11', quantidade: 60 },
+      { categoria: 'Sub-13', quantidade: 55 }, { categoria: 'Sub-15', quantidade: 50 },
+    ],
+  },
+  '1': { // Unidade 1 - Centro
+    kpis: { totalAlunos: 125, alunosAtivos: 118, mensalidadesPendentes: 15 },
+    proximosEventos: [
+      { id: 1, tipo: 'Jogo', data: new Date('2025-06-15T10:00:00'), descricao: 'Sub-15 vs EC Esperança', local: 'Campo Principal' },
+      { id: 2, tipo: 'Treino', data: new Date('2025-06-16T16:00:00'), descricao: 'Sub-11 - Treino Físico', local: 'Unidade Centro' },
+    ],
+    alunosPorCategoria: [
+      { categoria: 'Sub-9', quantidade: 25 }, { categoria: 'Sub-11', quantidade: 35 },
+      { categoria: 'Sub-13', quantidade: 30 }, { categoria: 'Sub-15', quantidade: 28 },
+    ],
+  },
+  '2': { // Unidade 2 - Sul
+    kpis: { totalAlunos: 80, alunosAtivos: 72, mensalidadesPendentes: 10 },
+    proximosEventos: [
+      { id: 3, tipo: 'Treino', data: new Date('2025-06-17T09:00:00'), descricao: 'Sub-13 - Treino Tático', local: 'Unidade Sul' },
+    ],
+    alunosPorCategoria: [
+      { categoria: 'Sub-9', quantidade: 15 }, { categoria: 'Sub-11', quantidade: 25 },
+      { categoria: 'Sub-13', quantidade: 25 }, { categoria: 'Sub-15', quantidade: 22 },
+    ],
+  },
+};
 
-      {/* Conteúdo Principal: Sidebar e Main */}
-      <div style={{ flex: 1, display: "flex", boxSizing: "border-box" }}>
-        {/* Sidebar */}
-        <aside
-          style={{
-            width: "250px",
-            backgroundColor: colors.bluePrimary,
-            color: colors.white,
-            padding: spacing.lg,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            boxSizing: "border-box",
-          }}
-        >
-          {/* Bloco de módulos, onde cada botão possui fundo específico */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: spacing.sm,
-            }}
-          >
-            {modules.map((modulo) => (
-              <button
-                key={modulo.label}
-                style={{
-                  width: "100%",
-                  backgroundColor: modulo.bg,
-                  border: "none",
-                  color: colors.textDark,
-                  fontSize: fontSizes.base,
-                  textAlign: "left" as const,
-                  padding: spacing.md,
-                  borderRadius: borders.radius,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: spacing.sm,
-                  cursor: "pointer",
-                }}
-              >
-                <span>{modulo.icon}</span>
-                <span>{modulo.label}</span>
-              </button>
-            ))}
-          </div>
+const fetchDashboardData = async (unitId: 'geral' | number): Promise<DashboardData> => {
+  console.log(`Buscando dados para a unidade: ${unitId}`);
+  await new Promise(resolve => setTimeout(resolve, 400));
+  return mockDashboardData[unitId] || mockDashboardData.geral;
+};
 
-          {/* Controle de Tema e Logout */}
-          <div style={{ display: "flex", flexDirection: "column", gap: spacing.md }}>
-            {/* Seletor de tema com controle segmentado */}
-            <div
-              style={{
-                display: "flex",
-                border: `1px solid ${colors.white}`,
-                borderRadius: borders.radius,
-                overflow: "hidden",
-              }}
-            >
-              <button
-                onClick={() => handleThemeChange("light")}
-                style={{
-                  flex: 1,
-                  padding: spacing.sm,
-                  backgroundColor: theme === "light" ? colors.primaryLight : "transparent",
-                  color: theme === "light" ? colors.white : colors.white,
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: fontSizes.base,
-                  transition: "background 0.2s",
-                }}
-              >
-                Claro
-              </button>
-              <button
-                onClick={() => handleThemeChange("dark")}
-                style={{
-                  flex: 1,
-                  padding: spacing.sm,
-                  backgroundColor: theme === "dark" ? colors.primaryLight : "transparent",
-                  color: theme === "dark" ? colors.white : colors.white,
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: fontSizes.base,
-                  transition: "background 0.2s",
-                }}
-              >
-                Escuro
-              </button>
-            </div>
-            {/* Botão de Logout */}
-            <button
-              style={{
-                backgroundColor: colors.error,
-                border: "none",
-                borderRadius: borders.radius,
-                color: colors.white,
-                padding: spacing.sm,
-                cursor: "pointer",
-                fontSize: fontSizes.base,
-              }}
-            >
-              Sair
-            </button>
-          </div>
-        </aside>
-
-        {/* Área Principal do Dashboard */}
-        <main
-          style={{
-            flex: 1,
-            backgroundColor: colors.background,
-            padding: spacing.lg,
-            boxSizing: "border-box",
-            overflow: "auto",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: fontSizes.title,
-              color: colors.textDark,
-              marginBottom: spacing.sm,
-            }}
-          >
-            Dashboard
-          </h2>
-
-          {/* Cards das Unidades dispostos lado a lado */}
-          <div
-            style={{
-              display: "flex",
-              gap: spacing.lg,
-              justifyContent: "center",
-            }}
-          >
-            {/* Unidade 1 */}
-            <div
-              style={{
-                flex: 1,
-                maxWidth: "400px",
-                backgroundColor: colors.white,
-                padding: spacing.lg,
-                borderRadius: borders.radius,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                border: `1px solid ${colors.textLight}`,
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: fontSizes.lg,
-                  color: colors.primary,
-                  marginBottom: spacing.sm,
-                }}
-              >
-                Unidade 1
-              </h3>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Quantidade de Alunos: <strong>120</strong>
-              </p>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Próximo Jogo: <strong>25/12/2025</strong>
-              </p>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Alunos Pagos: <strong>100</strong>
-              </p>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Alunos Não Pagos: <strong>20</strong>
-              </p>
-            </div>
-
-            {/* Unidade 2 */}
-            <div
-              style={{
-                flex: 1,
-                maxWidth: "400px",
-                backgroundColor: colors.white,
-                padding: spacing.lg,
-                borderRadius: borders.radius,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                border: `1px solid ${colors.textLight}`,
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: fontSizes.lg,
-                  color: colors.primary,
-                  marginBottom: spacing.sm,
-                }}
-              >
-                Unidade 2
-              </h3>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Quantidade de Alunos: <strong>80</strong>
-              </p>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Próximo Jogo: <strong>28/12/2025</strong>
-              </p>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Alunos Pagos: <strong>65</strong>
-              </p>
-              <p style={{ fontSize: fontSizes.base, color: colors.textDark }}>
-                Alunos Não Pagos: <strong>15</strong>
-              </p>
-            </div>
-          </div>
-        </main>
+// --- Componentes Auxiliares (StatCard, BarChart) - Sem alterações ---
+const StatCard: React.FC<{ icon: string; label: string; value: string | number; color: string; }> = ({ icon, label, value, color }) => (
+    <div style={{ backgroundColor: colors.white, display: 'flex', alignItems: 'center', padding: spacing.md, borderRadius: borders.radius, gap: spacing.md, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+      <div style={{ fontSize: '2rem', backgroundColor: color, color: colors.white, width: '60px', height: '60px', borderRadius: borders.radius, display: 'grid', placeItems: 'center' }}>{icon}</div>
+      <div>
+        <div style={{ fontSize: fontSizes.xl, fontWeight: 'bold', color: colors.textDark }}>{value}</div>
+        <div style={{ fontSize: fontSizes.sm, color: colors.textLight }}>{label}</div>
       </div>
     </div>
   );
+
+const BarChart: React.FC<{ data: { categoria: string, quantidade: number }[] }> = ({ data }) => {
+    const maxQuantidade = Math.max(...data.map(item => item.quantidade), 0);
+    return (
+      <div style={{ backgroundColor: colors.white, padding: spacing.lg, borderRadius: borders.radius, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+        <h3 style={{ marginTop: 0, color: colors.textDark, fontSize: fontSizes.lg }}>Alunos por Categoria</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', height: '200px', borderLeft: `2px solid ${colors.alternateRow}`, borderBottom: `2px solid ${colors.alternateRow}`, paddingLeft: spacing.sm }}>
+          {data.map(item => (
+            <div key={item.categoria} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+              <div style={{ width: '40px', backgroundColor: colors.primary, height: `${maxQuantidade > 0 ? (item.quantidade / maxQuantidade) * 100 : 0}%`, borderRadius: `${borders.radius} ${borders.radius} 0 0`, transition: 'height 0.5s' }} title={`${item.categoria}: ${item.quantidade} alunos`}></div>
+              <span style={{ fontSize: fontSizes.sm, marginTop: spacing.xs }}>{item.categoria}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+
+// --- COMPONENTE PRINCIPAL ---
+const DashBoard: React.FC = () => {
+  const { colors } = useTheme();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [selectedUnitId, setSelectedUnitId] = useState<'geral' | number>('geral');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setData(null); // Mostra o loading ao trocar de unidade
+    fetchDashboardData(selectedUnitId).then(setData);
+  }, [selectedUnitId]); // O useEffect agora depende da unidade selecionada
+
+  const mockUnidades = [{ id: 1, nome: "Unidade Centro" }, { id: 2, nome: "Unidade Sul" }];
+
+  return (
+          <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
+            <h2 style={{ fontSize: fontSizes.title, color: colors.textDark, margin: 0 }}>Dashboard</h2>
+            
+            {/* SELETOR DE UNIDADES */}
+            <div style={{ display: 'flex', gap: spacing.sm, backgroundColor: colors.white, padding: spacing.xs, borderRadius: borders.radius, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+              <button onClick={() => setSelectedUnitId('geral')} style={{ padding: spacing.sm, borderRadius: borders.radius, border: 'none', cursor: 'pointer', backgroundColor: selectedUnitId === 'geral' ? colors.primary : 'transparent', color: selectedUnitId === 'geral' ? colors.white : colors.textDark }}>Geral</button>
+              {mockUnidades.map(unidade => (
+                <button key={unidade.id} onClick={() => setSelectedUnitId(unidade.id)} style={{ padding: spacing.sm, borderRadius: borders.radius, border: 'none', cursor: 'pointer', backgroundColor: selectedUnitId === unidade.id ? colors.primary : 'transparent', color: selectedUnitId === unidade.id ? colors.white : colors.textDark }}>{unidade.nome}</button>
+              ))}
+            </div>
+          </div>
+          
+          {!data ? (<p>Carregando dados da unidade...</p>) : (
+            <>
+              {/* Seção de KPIs */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: spacing.lg, marginBottom: spacing.lg }}>
+                <StatCard icon="👥" label="Total de Alunos" value={data.kpis.totalAlunos} color="#5DADE2" />
+                <StatCard icon="👍" label="Alunos Ativos" value={data.kpis.alunosAtivos} color="#58D68D" />
+                <StatCard icon="💲" label="Mensalidades Pendentes" value={data.kpis.mensalidadesPendentes} color="#F5B041" />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: spacing.lg, alignItems: 'flex-start' }}>
+                
+                {/* Seção de Próximos Eventos */}
+                <div style={{ backgroundColor: colors.white, padding: spacing.lg, borderRadius: borders.radius, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                  <h3 style={{ marginTop: 0, color: colors.textDark, fontSize: fontSizes.lg }}>Próximos Eventos</h3>
+                  {data.proximosEventos.length > 0 ? (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {data.proximosEventos.map(evento => (
+                        <li key={evento.id} style={{ display: 'flex', alignItems: 'center', gap: spacing.md, padding: `${spacing.sm} 0`, borderBottom: `1px solid ${colors.alternateRow}` }}>
+                          <div style={{ fontSize: '1.5rem' }}>{evento.tipo === 'Jogo' ? '⚽' : '👟'}</div>
+                          <div>
+                            <strong>{evento.descricao}</strong>
+                            <div style={{ color: colors.textLight, fontSize: fontSizes.sm }}>
+                              {evento.data.toLocaleDateString('pt-BR')} às {evento.data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - {evento.local}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : <p>Nenhum evento futuro para esta unidade.</p>}
+                </div>
+                
+                {/* Seção do Gráfico */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.lg }}>
+                  <BarChart data={data.alunosPorCategoria} />
+                </div>
+
+              </div>
+            </>
+          )}
+      </>
+  );
 };
 
-export default Dashboard;
+export default DashBoard;

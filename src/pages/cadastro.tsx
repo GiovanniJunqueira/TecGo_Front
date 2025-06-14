@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { colors, fontSizes, spacing, borders } from "../designSystem";
+import { useTheme } from '../contexts/ThemeContext';
+import { fontSizes, spacing, borders } from '../designSystem';
 
 interface TitularData {
   nome: string;

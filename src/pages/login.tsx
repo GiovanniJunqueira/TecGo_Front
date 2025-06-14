@@ -1,5 +1,6 @@
 import React from "react";
-import { colors, fontSizes, spacing, borders } from "../designSystem";
+import { useTheme } from '../contexts/ThemeContext';
+import { fontSizes, spacing, borders } from '../designSystem';
 
 const Login = () => {
   return (
